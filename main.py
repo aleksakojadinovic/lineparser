@@ -6,6 +6,7 @@ if __name__ == '__main__':
     p += NOfParser(fcast=int, n=2) > ['m', 'n']
     p += MNOfMatrixParser(fcast=int, m=p['m'], n=p['n'], scope=p['m']) > 'matrix'
 
+
     p(filepath='src/test_files/dim_and_matrix_1.txt')
 
     print(p.saved_data)
