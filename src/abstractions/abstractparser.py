@@ -25,19 +25,24 @@ class ParsedUnit:
 class AbstractParser:
 
     def __init__(self, **kwargs):
+        self.single_lined = False
+        if 'scope' not in kwargs or kwargs['scope'] is None or kwargs['scope'] == 1:
+            kwargs['scope'] = 1
+            self.single_lined = True
+
         self.data = dict(kwargs)
         self.storage_key = None
 
-    def parse_(self, line) -> ParsedUnit:
+    def parse_(self, in_data) -> ParsedUnit:
         for key in self.data:
             entry = self.data[key]
             if isinstance(entry, StoreFetcher):
                 self.data[key] = entry.get()
 
-        pdata = self.parse(line, self.data)
+        pdata = self.parse(in_data, self.data)
         return ParsedUnit(pdata, self.storage_key)
 
-    def parse(self, line, data):
+    def parse(self, in_data, data):
         raise NotImplementedError
 
     def into(self, key):
@@ -73,15 +78,35 @@ class ParseSystem:
         if not self.units:
             raise ValueError(f'No parsing units found.')
 
-        for i, (line, unit) in enumerate(zip(lines, self.units)):
-            punit: ParsedUnit = unit.parse_(line)
+        lines_start = 0
+        for i, unit in enumerate(self.units):
+            unit_scope = unit.data['scope']
+            if isinstance(unit_scope, StoreFetcher):
+                unit_scope = unit_scope.get()
+            unit_lines = lines[lines_start:lines_start + unit_scope]
+            lines_start += unit_scope
+            if unit.single_lined:
+                unit_lines = unit_lines[0]
+            punit: ParsedUnit = unit.parse_(unit_lines)
             if punit.storage_key is not None:
                 if isinstance(punit.storage_key, str):
                     self[punit.storage_key] = punit.data
                 else:
-                    # Assume iterable of strings and data iterable of something
                     for single_key, single_val in zip(punit.storage_key, punit.data):
                         self[single_key] = single_val
+
+
+
+
+        # for i, (line, unit) in enumerate(zip(lines, self.units)):
+        #     punit: ParsedUnit = unit.parse_(line)
+        #     if punit.storage_key is not None:
+        #         if isinstance(punit.storage_key, str):
+        #             self[punit.storage_key] = punit.data
+        #         else:
+        #             # Assume iterable of strings and data iterable of something
+        #             for single_key, single_val in zip(punit.storage_key, punit.data):
+        #                 self[single_key] = single_val
 
 
 

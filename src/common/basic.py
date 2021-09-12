@@ -31,6 +31,7 @@ class MNOfMatrixParser(AbstractParser):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-    def parse(self, line, data):
+    def parse(self, in_data, data):
         m, n, fcast = data['m'], data['n'], data['fcast']
+        return [[fcast(entry) for entry in line.split(" ")] for line in in_data]
 
