@@ -22,8 +22,8 @@ class ParsedUnit:
         self.storage_key = storage_key
 
 
+# TODO: allow separator (here or in specific parsers? or create an abstract class SequenceParser? idk)
 class AbstractParser:
-
     def __init__(self, **kwargs):
         self.single_lined = False
         if 'scope' not in kwargs or kwargs['scope'] is None or kwargs['scope'] == 1:
@@ -42,7 +42,7 @@ class AbstractParser:
         pdata = self.parse(in_data, self.data)
         return ParsedUnit(pdata, self.storage_key)
 
-    def parse(self, in_data, data):
+    def parse(self, in_data, meta):
         raise NotImplementedError
 
     def into(self, key):
@@ -69,7 +69,7 @@ class ParseSystem:
         elif 'lines' in kwargs:
             lines = kwargs['lines']
         elif 'str' in kwargs:
-            # TODO: Won't work on windows
+            # TODO: Won't work on windows, fetch newline from sys/env or wherever
             lines = kwargs['str'].split("\n")
         else:
             raise ValueError(f'No input found.')

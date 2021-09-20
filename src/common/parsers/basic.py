@@ -5,8 +5,8 @@ class NOfParser(AbstractParser):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-    def parse(self, line, data):
-        n, fcast = data['n'], data['fcast']
+    def parse(self, line, meta):
+        n, fcast = meta['n'], meta['fcast']
         vals = line.split(" ")
         if n is not None and len(vals) != n:
             raise ValueError(f'Expected {n} values, got {len(vals)}')
@@ -23,7 +23,7 @@ class SingleOfParser(AbstractParser):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-    def parse(self, line, data):
+    def parse(self, line, meta):
         fcast = self.data['fcast']
         return fcast(line)
 
@@ -31,7 +31,7 @@ class MNOfMatrixParser(AbstractParser):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-    def parse(self, in_data, data):
-        m, n, fcast = data['m'], data['n'], data['fcast']
+    def parse(self, in_data, meta):
+        n, fcast = meta['n'], meta['fcast']
         return [[fcast(entry) for entry in line.split(" ")] for line in in_data]
 
